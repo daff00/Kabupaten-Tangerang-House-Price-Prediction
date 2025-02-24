@@ -6,7 +6,7 @@ import pickle
 st.set_page_config(page_title="Prediksi Harga Rumah", layout="wide")
 
 # Tab Navigasi
-tab1, tab2 = st.tabs(["🏠 Home", "📊 Prediksi"])
+tab1, tab2, tab3 = st.tabs(["🏠 Home", "⚠️Disclaimer", "📊 Prediksi"])
 
 # Tab Home
 with tab1:
@@ -20,12 +20,45 @@ with tab1:
     2. Isi semua input yang tersedia.
     3. Klik tombol **Prediksi Harga**.
     4. Harga estimasi akan ditampilkan dalam bentuk rupiah.
+             
+    *Notes: Perhatikan
     
     🚀 **Mulai sekarang dengan membuka tab Prediksi!**
     """)
 
-# Tab Prediksi
+# Tab Disclaimer
+# Tab Disclaimer
 with tab2:
+    st.title("⚠️ Disclaimer")
+    st.markdown("""
+    **Harap Perhatian** 🏠🔍  
+
+    Website ini menyediakan estimasi harga rumah berdasarkan model prediktif yang dikembangkan menggunakan teknik pembelajaran mesin.  
+
+    ---
+    
+    ⚠️ **Hanya Sebagai Referensi**  
+    Prediksi yang diberikan oleh sistem ini hanya bersifat estimasi dan **tidak dapat dijadikan acuan pasti** dalam transaksi jual beli properti.  
+
+    📊 **Ketergantungan pada Data**  
+    Akurasi prediksi bergantung pada data yang digunakan dalam pelatihan model. **Faktor eksternal** seperti kondisi ekonomi dan tren pasar **tidak selalu terakomodasi** dalam model ini.  
+
+    🚫 **Tidak Menjamin Akurasi**  
+    Meskipun model telah dioptimalkan, hasil prediksi bisa berbeda dengan harga pasar sebenarnya.  
+
+    💡 **Bukan Saran Keuangan atau Properti**  
+    Website ini **bukan merupakan saran investasi**. Disarankan untuk **berkonsultasi dengan agen properti** atau profesional terkait sebelum mengambil keputusan.  
+
+    🔐 **Privasi Data**  
+    Website ini **tidak menyimpan atau membagikan data** yang diinput pengguna tanpa izin.  
+
+    ---
+    
+    Dengan menggunakan layanan ini, pengguna **menyetujui bahwa pengembang website tidak bertanggung jawab atas keputusan yang dibuat berdasarkan hasil prediksi**.
+    """, unsafe_allow_html=True)
+
+# Tab Prediksi
+with tab3:
     st.title("📊 Prediksi Harga Rumah")
 
     # Layout dengan 2 kolom untuk input user
@@ -47,66 +80,75 @@ with tab2:
         kamar_mandi_pembantu = st.number_input("Kamar Mandi Pembantu:", min_value=0, max_value=5, value=0)
 
     # Pilihan Kecamatan
-    kecamatan_list = [
+    # Kecamatan yang tersedia dalam model (harus sesuai dengan saat model dilatih)
+    kecamatan_tersedia = [
         'Balaraja', 'Cikupa', 'Cisauk', 'Curug', 'Jatiuwung', 'Jayanti', 'Kadu',
         'Kelapa Dua', 'Kosambi', 'Kresek', 'Legok', 'Mauk', 'Pagedangan',
         'Panongan', 'Pasar Kemis', 'Rajeg', 'Sepatan', 'Sindang Jaya', 'Solear',
         'Teluk Naga', 'Tigaraksa'
     ]
-    selected_kecamatan = st.selectbox("🏙️ Pilih Kecamatan:", kecamatan_list)
 
-    # One-Hot Encoding Kecamatan
-    kecamatan_encoded = {f'kec_{kec}': 0 for kec in kecamatan_list}
-    kecamatan_encoded[f'kec_{selected_kecamatan}'] = 1  # Set kecamatan yang dipilih ke 1
+    # Kecamatan yang tidak memiliki data harga rumah
+    kecamatan_tidak_tersedia = [
+        'Gunung Kaler', 'Jambe', 'Kemiri', 'Mekar Baru', 
+        'Pakuhaji', 'Sepatan Timur', 'Sukadiri', 'Sukamulya'
+    ]
 
-    # Gabungkan input user ke DataFrame
-    df_input = pd.DataFrame({
-        'Kamar Tidur': [kamar_tidur],
-        'Kamar Mandi': [kamar_mandi],
-        'Luas Tanah': [np.log1p(luas_tanah)],  # Transformasi log1p
-        'Luas Bangunan': [np.log1p(luas_bangunan)],  # Transformasi log1p
-        'Daya Listrik': [daya_listrik],
-        'Jumlah Lantai': [jumlah_lantai],
-        'Carport': [carport],
-        'Kamar Tidur Pembantu': [kamar_tidur_pembantu],
-        'Kamar Mandi Pembantu': [kamar_mandi_pembantu]
-    })
-
-    df_final = pd.concat([df_input, pd.DataFrame([kecamatan_encoded])], axis=1)
-
-    # Urutkan fitur agar sesuai dengan model
-    expected_columns = [
-        'Kamar Tidur', 'Kamar Mandi', 'Luas Tanah', 'Luas Bangunan', 'Daya Listrik',
-        'Jumlah Lantai', 'Carport', 'Kamar Tidur Pembantu', 'Kamar Mandi Pembantu'
-    ] + [f'kec_{kec}' for kec in kecamatan_list]
-
-    df_final = df_final[expected_columns]
-
-    # Tambahkan jarak antar elemen
-    st.markdown("<br>", unsafe_allow_html=True)
+    # Pilih kecamatan berdasarkan daftar yang tersedia
+    selected_kecamatan = st.selectbox("🏙️ Pilih Kecamatan:", kecamatan_tersedia + kecamatan_tidak_tersedia)
 
     # Tombol Prediksi di Tengah
-    col1, col2, col3 = st.columns([1, 2, 1])  # Membuat layout 3 kolom (kolom tengah lebih besar)
+    col1, col2, col3 = st.columns([1, 2, 1])
 
     with col2:
         predict_button = st.button("🔍 Prediksi Harga", use_container_width=True)
 
     # Jika tombol ditekan
     if predict_button:
-        try:
-            # Load model
-            with open("Model/xgboost_optuna.pkl", "rb") as f:
-                model_xgb = pickle.load(f)
+        if selected_kecamatan in kecamatan_tidak_tersedia:
+            st.error(f"❌ Mohon Maaf! Data Harga Rumah untuk Kecamatan **{selected_kecamatan}** belum tersedia.")
+        else:
+            try:
+                # One-Hot Encoding hanya untuk kecamatan yang tersedia
+                kecamatan_encoded = {f'kec_{kec}': 0 for kec in kecamatan_tersedia}
+                kecamatan_encoded[f'kec_{selected_kecamatan}'] = 1  # Set kecamatan yang dipilih ke 1
 
-            # Prediksi harga rumah dalam bentuk log
-            predicted_price_log = model_xgb.predict(df_final)
+                # Gabungkan input user ke DataFrame
+                df_input = pd.DataFrame({
+                    'Kamar Tidur': [kamar_tidur],
+                    'Kamar Mandi': [kamar_mandi],
+                    'Luas Tanah': [np.log1p(luas_tanah)],  # Transformasi log1p
+                    'Luas Bangunan': [np.log1p(luas_bangunan)],  # Transformasi log1p
+                    'Daya Listrik': [daya_listrik],
+                    'Jumlah Lantai': [jumlah_lantai],
+                    'Carport': [carport],
+                    'Kamar Tidur Pembantu': [kamar_tidur_pembantu],
+                    'Kamar Mandi Pembantu': [kamar_mandi_pembantu]
+                })
 
-            # Konversi kembali ke harga asli
-            predicted_price = np.expm1(predicted_price_log) 
+                df_final = pd.concat([df_input, pd.DataFrame([kecamatan_encoded])], axis=1)
 
-            # Menampilkan hasil prediksi
-            st.subheader("💰 Estimasi Harga Rumah:")
-            st.success(f"Rp {predicted_price[0]:,.0f}")
+                # Pastikan urutan fitur sesuai dengan yang digunakan saat model dilatih
+                expected_columns = [
+                    'Kamar Tidur', 'Kamar Mandi', 'Luas Tanah', 'Luas Bangunan', 'Daya Listrik',
+                    'Jumlah Lantai', 'Carport', 'Kamar Tidur Pembantu', 'Kamar Mandi Pembantu'
+                ] + [f'kec_{kec}' for kec in kecamatan_tersedia]
 
-        except Exception as e:
-            st.error(f"Terjadi kesalahan: {e}")
+                df_final = df_final[expected_columns]
+
+                # Load model
+                with open("Model/xgboost_optuna.pkl", "rb") as f:
+                    model_xgb = pickle.load(f)
+
+                # Prediksi harga rumah dalam bentuk log
+                predicted_price_log = model_xgb.predict(df_final)
+
+                # Konversi kembali ke harga asli
+                predicted_price = np.expm1(predicted_price_log) 
+
+                # Menampilkan hasil prediksi
+                st.subheader("💰 Estimasi Harga Rumah:")
+                st.success(f"Rp {predicted_price[0]:,.0f}")
+
+            except Exception as e:
+                st.error(f"Terjadi kesalahan: {e}")
