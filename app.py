@@ -21,7 +21,7 @@ with tab1:
     3. Klik tombol **Prediksi Harga**.
     4. Harga estimasi akan ditampilkan dalam bentuk rupiah.
              
-    *Notes: Perhatikan
+    *Notes: Buka tab Disclaimer untuk membaca beberapa ketentuan dan batasan terkait estimasi harga rumah yang diberikan oleh aplikasi ini.
     
     🚀 **Mulai sekarang dengan membuka tab Prediksi!**
     """)
