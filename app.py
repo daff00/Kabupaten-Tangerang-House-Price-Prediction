@@ -147,7 +147,9 @@ with tab3:
 
                 # Menampilkan hasil prediksi
                 st.subheader("💰 Estimasi Harga Rumah:")
-                st.success(f"Rp {predicted_price[0]:,.0f}")
+                col1, col2, col3 = st.columns([1, 2, 1])
+                with col2:
+                    st.success(f"Rp {predicted_price[0]:,.0f}")
 
             except Exception as e:
                 st.error(f"Terjadi kesalahan: {e}")
