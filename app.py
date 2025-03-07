@@ -3,20 +3,20 @@ import pandas as pd
 import numpy as np
 import pickle
 
-st.set_page_config(page_title="Prediksi Harga Rumah", layout="wide")
+# Konfigurasi halaman
+st.set_page_config(page_title="Prediksi Harga Rumah Kab. Tangerang", layout="wide")
 
 # Tab Navigasi
-tab1, tab2, tab3 = st.tabs(["🏠 Home", "⚠️Disclaimer", "📊 Prediksi"])
+tab1, tab2, tab3 = st.tabs(["🏠 Home", "⚠️ Disclaimer", "📊 Prediction"])
 
 # Tab Home
 with tab1:
-    st.title("🏠 Selamat Datang di Aplikasi Prediksi Harga Rumah")
+    st.title("🏠 Selamat Datang di Aplikasi Prediksi Harga Rumah di Kabupaten Tangerang")
     st.write("""
-    Aplikasi ini menggunakan model Machine Learning (XGBoost + Optuna) untuk memprediksi harga rumah 
-    berdasarkan fitur seperti jumlah kamar, luas tanah, daya listrik, dan lokasi kecamatan.
+    Aplikasi ini menggunakan model Machine Learning (XGBoost + Optuna) untuk memprediksi harga rumah di Kabupaten Tangerang berdasarkan spesifikasi rumah.
     
     **Cara Menggunakan:**
-    1. Buka tab **Prediksi**.
+    1. Buka tab **Prediction**.
     2. Isi semua input yang tersedia.
     3. Klik tombol **Prediksi Harga**.
     4. Harga estimasi akan ditampilkan dalam bentuk rupiah.
@@ -27,13 +27,12 @@ with tab1:
     """)
 
 # Tab Disclaimer
-# Tab Disclaimer
 with tab2:
     st.title("⚠️ Disclaimer")
     st.markdown("""
     **Harap Perhatian** 🏠🔍  
 
-    Website ini menyediakan estimasi harga rumah berdasarkan model prediktif yang dikembangkan menggunakan teknik pembelajaran mesin.  
+    Website ini menyediakan estimasi harga rumah berdasarkan model prediktif yang dikembangkan menggunakan teknik machine learning.  
 
     ---
     
@@ -41,7 +40,7 @@ with tab2:
     Prediksi yang diberikan oleh sistem ini hanya bersifat estimasi dan **tidak dapat dijadikan acuan pasti** dalam transaksi jual beli properti.  
 
     📊 **Ketergantungan pada Data**  
-    Akurasi prediksi bergantung pada data yang digunakan dalam pelatihan model. **Faktor eksternal** seperti kondisi ekonomi dan tren pasar **tidak selalu terakomodasi** dalam model ini.  
+    Akurasi prediksi bergantung pada data yang digunakan dalam pelatihan model.
 
     🚫 **Tidak Menjamin Akurasi**  
     Meskipun model telah dioptimalkan, hasil prediksi bisa berbeda dengan harga pasar sebenarnya.  
@@ -65,14 +64,14 @@ with tab3:
     col1, col2 = st.columns(2)
 
     with col1:
-        st.subheader("🏡 Informasi Properti")
+        st.subheader("🏡 Informasi Umum")
         kamar_tidur = st.number_input("Jumlah Kamar Tidur:", min_value=1, max_value=10, value=3)
         kamar_mandi = st.number_input("Jumlah Kamar Mandi:", min_value=1, max_value=10, value=2)
         luas_tanah = st.number_input("Luas Tanah (m²):", min_value=10, max_value=1000, value=100)
         luas_bangunan = st.number_input("Luas Bangunan (m²):", min_value=10, max_value=1000, value=80)
 
     with col2:
-        st.subheader("⚡ Spesifikasi Tambahan")
+        st.subheader("⚡ Spesifikasi Rumah")
         daya_listrik = st.number_input("Daya Listrik (Watt):", min_value=450, max_value=6600, value=1300)
         jumlah_lantai = st.number_input("Jumlah Lantai:", min_value=1, max_value=5, value=1)
         carport = st.number_input("Carport (Jumlah Mobil):", min_value=0, max_value=5, value=1)
