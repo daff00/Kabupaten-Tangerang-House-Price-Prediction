@@ -112,6 +112,10 @@ with tab3:
                 kecamatan_encoded = {f'kec_{kec}': 0 for kec in kecamatan_tersedia}
                 kecamatan_encoded[f'kec_{selected_kecamatan}'] = 1  # Set kecamatan yang dipilih ke 1
 
+                #Load Ordinal Encoder
+                with open("Model/encoder_data_listrik.pkl", "rb") as f:
+                    watt_enc = pickle.load(f)
+
                 # Gabungkan input user ke DataFrame
                 df_input = pd.DataFrame({
                     'Kamar Tidur': [kamar_tidur],
@@ -124,6 +128,9 @@ with tab3:
                     'Kamar Tidur Pembantu': [kamar_tidur_pembantu],
                     'Kamar Mandi Pembantu': [kamar_mandi_pembantu]
                 })
+
+                # Encoding kolom Daya Listrik 
+                df_input[['Daya Listrik']] = watt_enc.transform(df_input[['Daya Listrik']])
 
                 df_final = pd.concat([df_input, pd.DataFrame([kecamatan_encoded])], axis=1)
 
@@ -147,9 +154,14 @@ with tab3:
 
                 # Menampilkan hasil prediksi
                 st.subheader("💰 Estimasi Harga Rumah:")
-                col1, col2, col3 = st.columns([1, 2, 1])
-                with col2:
-                    st.success(f"Rp {predicted_price[0]:,.0f}")
+                st.markdown(
+                    f"""
+                    <div style='background-color: #d4edda; padding: 10px; border-radius: 5px; color: #155724; text-align: center; font-weight: bold;'>
+                        Rp {predicted_price[0]:,.0f}
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
 
             except Exception as e:
                 st.error(f"Terjadi kesalahan: {e}")
