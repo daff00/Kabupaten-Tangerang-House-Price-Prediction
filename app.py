@@ -7,7 +7,7 @@ import pickle
 st.set_page_config(page_title="Prediksi Harga Rumah Kab. Tangerang", layout="wide")
 
 # Tab Navigasi
-tab1, tab2, tab3 = st.tabs(["🏠 Home", "⚠️ Disclaimer", "📊 Prediction"])
+tab1, tab2, tab3, tab4 = st.tabs(["🏠 Home", "⚠️ Disclaimer", "📊 Prediction", "🔎 Filter"])
 
 # Tab Home
 with tab1:
@@ -165,3 +165,76 @@ with tab3:
 
             except Exception as e:
                 st.error(f"Terjadi kesalahan: {e}")
+
+with tab4:
+    st.title("🔎 Filter Rumah Berdasarkan Harga dan Lokasi")
+
+    col1, col2 = st.columns(2)
+
+    # Load dataset rumah
+    df_rumah = pd.read_csv("Dataset/Data Harga Rumah Kabupaten Tangerang.csv")
+
+    # Tambahkan kolom kategori harga dengan range lebih detail
+    def categorize_price(harga):
+        if harga < 500_000_000:
+            return "< 500 Juta"
+        elif harga < 1_000_000_000:
+            return "500 Juta - 1 Miliar"
+        elif harga < 1_500_000_000:
+            return "1 - 1.5 Miliar"
+        elif harga < 2_000_000_000:
+            return "1.5 - 2 Miliar"
+        elif harga < 2_500_000_000:
+            return "2 - 2.5 Miliar"
+        elif harga < 3_000_000_000:
+            return "2.5 - 3 Miliar"
+        elif harga < 4_000_000_000:
+            return "3 - 4 Miliar"
+        elif harga < 5_000_000_000:
+            return "4 - 5 Miliar"
+        else:
+            return "> 5 Miliar"
+
+    # Tambahkan ke DataFrame
+    df_rumah["Range Harga"] = df_rumah["Harga"].apply(categorize_price)
+
+    with col1:
+        lokasi_filter = st.selectbox("📍 Pilih Kecamatan:", sorted(df_rumah["Kecamatan"].dropna().unique()))
+
+    with col2:
+        # Urutan dropdown harga secara manual
+        harga_options = [
+            "< 500 Juta",
+            "500 Juta - 1 Miliar",
+            "1 - 1.5 Miliar",
+            "1.5 - 2 Miliar",
+            "2 - 2.5 Miliar",
+            "2.5 - 3 Miliar",
+            "3 - 4 Miliar",
+            "4 - 5 Miliar",
+            "> 5 Miliar"
+        ]
+
+        harga_filter = st.selectbox("💰 Pilih Rentang Harga:", harga_options)
+
+    if lokasi_filter not in df_rumah["Kecamatan"].values:
+        st.error(f"❌ Kecamatan **{lokasi_filter}** tidak tersedia dalam database.")
+    else:
+        df_filtered = df_rumah[
+            (df_rumah["Kecamatan"] == lokasi_filter) & (df_rumah["Range Harga"] == harga_filter)
+        ]
+
+        df_filtered_display = df_filtered.copy()
+        df_filtered_display["Harga"] = df_filtered_display["Harga"].apply(lambda x: f"Rp {x:,.0f}")
+
+        tampilkan_kolom = [
+            "Harga", "Kecamatan", "Kamar Tidur", "Kamar Mandi", "Luas Tanah",
+            "Luas Bangunan", "Daya Listrik", "Jumlah Lantai", "Carport",
+            "Kamar Tidur Pembantu", "Kamar Mandi Pembantu"
+        ]
+
+        st.subheader("🏘️ Daftar Rumah Sesuai Kriteria:")
+        if not df_filtered_display.empty:
+            st.dataframe(df_filtered_display[tampilkan_kolom], use_container_width=True)
+        else:
+            st.info("Tidak ada rumah yang sesuai dengan filter yang dipilih.")
