@@ -16,7 +16,7 @@ with tab1:
     Aplikasi ini menggunakan model Machine Learning (XGBoost + Optuna) untuk memprediksi harga rumah di Kabupaten Tangerang berdasarkan spesifikasi rumah.
     
     **Cara Menggunakan:**
-    1. Buka tab **Prediction**.
+    1. Buka tab **📊 House Price Prediction**.
     2. Isi semua input yang tersedia.
     3. Klik tombol **Prediksi Harga**.
     4. Harga estimasi akan ditampilkan dalam bentuk rupiah.
@@ -167,7 +167,7 @@ with tab3:
                 st.error(f"Terjadi kesalahan: {e}")
 
 with tab4:
-    st.title("🔎 Filter Rumah Berdasarkan Harga dan Lokasi")
+    st.title("🔎 Prediksi Sepsifikasi Rumah Berdasarkan Harga dan Lokasi")
 
     # Load dataset rumah
     df_rumah = pd.read_csv("Dataset/Data Harga Rumah Kabupaten Tangerang.csv")
@@ -225,18 +225,25 @@ with tab4:
 
             colA, colB = st.columns(2)
 
+            def tampilkan_range(label, data):
+                min_val, max_val = data.min(), data.max()
+                if min_val == max_val:
+                    st.write(f"**{label}:** {min_val}")
+                else:
+                    st.write(f"**{label}:** {min_val} - {max_val}")
+
             with colA:
-                st.write(f"**Jumlah Kamar Tidur:** {df_filtered['Kamar Tidur'].min()} - {df_filtered['Kamar Tidur'].max()}")
-                st.write(f"**Jumlah Kamar Mandi:** {df_filtered['Kamar Mandi'].min()} - {df_filtered['Kamar Mandi'].max()}")
-                st.write(f"**Luas Tanah (m²):** {df_filtered['Luas Tanah'].min()} - {df_filtered['Luas Tanah'].max()}")
-                st.write(f"**Luas Bangunan (m²):** {df_filtered['Luas Bangunan'].min()} - {df_filtered['Luas Bangunan'].max()}")
-                st.write(f"**Daya Listrik (Watt):** {df_filtered['Daya Listrik'].min()} - {df_filtered['Daya Listrik'].max()}")
+                tampilkan_range("Jumlah Kamar Tidur", df_filtered["Kamar Tidur"])
+                tampilkan_range("Jumlah Kamar Mandi", df_filtered["Kamar Mandi"])
+                tampilkan_range("Luas Tanah (m²)", df_filtered["Luas Tanah"])
+                tampilkan_range("Luas Bangunan (m²)", df_filtered["Luas Bangunan"])
+                tampilkan_range("Daya Listrik (Watt)", df_filtered["Daya Listrik"])
 
             with colB:
-                st.write(f"**Jumlah Lantai:** {df_filtered['Jumlah Lantai'].min()} - {df_filtered['Jumlah Lantai'].max()}")
-                st.write(f"**Carport (Mobil):** {df_filtered['Carport'].min()} - {df_filtered['Carport'].max()}")
-                st.write(f"**Kamar Tidur Pembantu:** {df_filtered['Kamar Tidur Pembantu'].min()} - {df_filtered['Kamar Tidur Pembantu'].max()}")
-                st.write(f"**Kamar Mandi Pembantu:** {df_filtered['Kamar Mandi Pembantu'].min()} - {df_filtered['Kamar Mandi Pembantu'].max()}")
+                tampilkan_range("Jumlah Lantai", df_filtered["Jumlah Lantai"])
+                tampilkan_range("Carport (Mobil)", df_filtered["Carport"])
+                tampilkan_range("Kamar Tidur Pembantu", df_filtered["Kamar Tidur Pembantu"])
+                tampilkan_range("Kamar Mandi Pembantu", df_filtered["Kamar Mandi Pembantu"])
 
             # Tabel data rumah
             df_filtered_display = df_filtered.copy()
