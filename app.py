@@ -7,7 +7,7 @@ import pickle
 st.set_page_config(page_title="Prediksi Harga Rumah Kab. Tangerang", layout="wide")
 
 # Tab Navigasi
-tab1, tab2, tab3, tab4 = st.tabs(["🏠 Home", "⚠️ Disclaimer", "📊 Prediction", "🔎 Filter"])
+tab1, tab2, tab3, tab4 = st.tabs(["🏠 Home", "⚠️ Disclaimer", "📊 House Price Prediction", "🔎 House Specs Prediction"])
 
 # Tab Home
 with tab1:
@@ -69,10 +69,10 @@ with tab3:
         kamar_mandi = st.number_input("Jumlah Kamar Mandi:", min_value=1, max_value=10, value=2)
         luas_tanah = st.number_input("Luas Tanah (m²):", min_value=10, max_value=1000, value=100)
         luas_bangunan = st.number_input("Luas Bangunan (m²):", min_value=10, max_value=1000, value=80)
+        daya_listrik = st.number_input("Daya Listrik (Watt):", min_value=450, max_value=6600, value=1300)
 
     with col2:
         st.subheader("⚡ Spesifikasi Rumah")
-        daya_listrik = st.number_input("Daya Listrik (Watt):", min_value=450, max_value=6600, value=1300)
         jumlah_lantai = st.number_input("Jumlah Lantai:", min_value=1, max_value=5, value=1)
         carport = st.number_input("Carport (Jumlah Mobil):", min_value=0, max_value=5, value=1)
         kamar_tidur_pembantu = st.number_input("Kamar Tidur Pembantu:", min_value=0, max_value=5, value=0)
@@ -169,12 +169,9 @@ with tab3:
 with tab4:
     st.title("🔎 Filter Rumah Berdasarkan Harga dan Lokasi")
 
-    col1, col2 = st.columns(2)
-
     # Load dataset rumah
     df_rumah = pd.read_csv("Dataset/Data Harga Rumah Kabupaten Tangerang.csv")
 
-    # Tambahkan kolom kategori harga dengan range lebih detail
     def categorize_price(harga):
         if harga < 500_000_000:
             return "< 500 Juta"
@@ -195,14 +192,14 @@ with tab4:
         else:
             return "> 5 Miliar"
 
-    # Tambahkan ke DataFrame
     df_rumah["Range Harga"] = df_rumah["Harga"].apply(categorize_price)
+
+    col1, col2 = st.columns(2)
 
     with col1:
         lokasi_filter = st.selectbox("📍 Pilih Kecamatan:", sorted(df_rumah["Kecamatan"].dropna().unique()))
 
     with col2:
-        # Urutan dropdown harga secara manual
         harga_options = [
             "< 500 Juta",
             "500 Juta - 1 Miliar",
@@ -214,7 +211,6 @@ with tab4:
             "4 - 5 Miliar",
             "> 5 Miliar"
         ]
-
         harga_filter = st.selectbox("💰 Pilih Rentang Harga:", harga_options)
 
     if lokasi_filter not in df_rumah["Kecamatan"].values:
@@ -224,17 +220,35 @@ with tab4:
             (df_rumah["Kecamatan"] == lokasi_filter) & (df_rumah["Range Harga"] == harga_filter)
         ]
 
-        df_filtered_display = df_filtered.copy()
-        df_filtered_display["Harga"] = df_filtered_display["Harga"].apply(lambda x: f"Rp {x:,.0f}")
+        if not df_filtered.empty:
+            st.subheader("📌 Ringkasan Spesifikasi Rumah:")
 
-        tampilkan_kolom = [
-            "Harga", "Kecamatan", "Kamar Tidur", "Kamar Mandi", "Luas Tanah",
-            "Luas Bangunan", "Daya Listrik", "Jumlah Lantai", "Carport",
-            "Kamar Tidur Pembantu", "Kamar Mandi Pembantu"
-        ]
+            colA, colB = st.columns(2)
 
-        st.subheader("🏘️ Daftar Rumah Sesuai Kriteria:")
-        if not df_filtered_display.empty:
+            with colA:
+                st.write(f"**Jumlah Kamar Tidur:** {df_filtered['Kamar Tidur'].min()} - {df_filtered['Kamar Tidur'].max()}")
+                st.write(f"**Jumlah Kamar Mandi:** {df_filtered['Kamar Mandi'].min()} - {df_filtered['Kamar Mandi'].max()}")
+                st.write(f"**Luas Tanah (m²):** {df_filtered['Luas Tanah'].min()} - {df_filtered['Luas Tanah'].max()}")
+                st.write(f"**Luas Bangunan (m²):** {df_filtered['Luas Bangunan'].min()} - {df_filtered['Luas Bangunan'].max()}")
+                st.write(f"**Daya Listrik (Watt):** {df_filtered['Daya Listrik'].min()} - {df_filtered['Daya Listrik'].max()}")
+
+            with colB:
+                st.write(f"**Jumlah Lantai:** {df_filtered['Jumlah Lantai'].min()} - {df_filtered['Jumlah Lantai'].max()}")
+                st.write(f"**Carport (Mobil):** {df_filtered['Carport'].min()} - {df_filtered['Carport'].max()}")
+                st.write(f"**Kamar Tidur Pembantu:** {df_filtered['Kamar Tidur Pembantu'].min()} - {df_filtered['Kamar Tidur Pembantu'].max()}")
+                st.write(f"**Kamar Mandi Pembantu:** {df_filtered['Kamar Mandi Pembantu'].min()} - {df_filtered['Kamar Mandi Pembantu'].max()}")
+
+            # Tabel data rumah
+            df_filtered_display = df_filtered.copy()
+            df_filtered_display["Harga"] = df_filtered_display["Harga"].apply(lambda x: f"Rp {x:,.0f}")
+
+            tampilkan_kolom = [
+                "Harga", "Kecamatan", "Kamar Tidur", "Kamar Mandi", "Luas Tanah",
+                "Luas Bangunan", "Daya Listrik", "Jumlah Lantai", "Carport",
+                "Kamar Tidur Pembantu", "Kamar Mandi Pembantu"
+            ]
+
+            st.subheader("🏘️ Daftar Rumah Sesuai Kriteria:")
             st.dataframe(df_filtered_display[tampilkan_kolom], use_container_width=True)
         else:
             st.info("Tidak ada rumah yang sesuai dengan filter yang dipilih.")
