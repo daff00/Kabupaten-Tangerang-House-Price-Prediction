@@ -167,7 +167,7 @@ with tab3:
                 st.error(f"Terjadi kesalahan: {e}")
 
 with tab4:
-    st.title("🔎 Prediksi Sepsifikasi Rumah Berdasarkan Harga dan Lokasi")
+    st.title("🔎 Prediksi Spesifikasi Rumah Berdasarkan Harga dan Lokasi")
 
     # Load dataset rumah
     df_rumah = pd.read_csv("Dataset/Data Harga Rumah Kabupaten Tangerang.csv")
