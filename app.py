@@ -172,6 +172,7 @@ with tab4:
     # Load dataset rumah
     df_rumah = pd.read_csv("Dataset/Data Harga Rumah Kabupaten Tangerang.csv")
 
+    # Buat kategori range harga
     def categorize_price(harga):
         if harga < 500_000_000:
             return "< 500 Juta"
@@ -194,31 +195,26 @@ with tab4:
 
     df_rumah["Range Harga"] = df_rumah["Harga"].apply(categorize_price)
 
+    # Dropdown filter
     col1, col2 = st.columns(2)
-
     with col1:
-        lokasi_filter = st.selectbox("📍 Pilih Kecamatan:", sorted(df_rumah["Kecamatan"].dropna().unique()))
+        lokasi_list = sorted(df_rumah["Kecamatan"].dropna().unique())
+        lokasi_filter = st.selectbox("📍 Pilih Kecamatan:", lokasi_list if lokasi_list else ["(Tidak tersedia)"])
 
     with col2:
         harga_options = [
-            "< 500 Juta",
-            "500 Juta - 1 Miliar",
-            "1 - 1.5 Miliar",
-            "1.5 - 2 Miliar",
-            "2 - 2.5 Miliar",
-            "2.5 - 3 Miliar",
-            "3 - 4 Miliar",
-            "4 - 5 Miliar",
-            "> 5 Miliar"
+            "< 500 Juta", "500 Juta - 1 Miliar", "1 - 1.5 Miliar", "1.5 - 2 Miliar",
+            "2 - 2.5 Miliar", "2.5 - 3 Miliar", "3 - 4 Miliar", "4 - 5 Miliar", "> 5 Miliar"
         ]
-        harga_filter = st.selectbox("💰 Pilih Rentang Harga:", harga_options)
+        df_subset = df_rumah[df_rumah["Kecamatan"] == lokasi_filter]
+        harga_tersedia = df_subset["Range Harga"].unique().tolist()
+        harga_filter = st.selectbox("💰 Pilih Rentang Harga:", [h for h in harga_options if h in harga_tersedia])
 
+    # Filter data
     if lokasi_filter not in df_rumah["Kecamatan"].values:
         st.error(f"❌ Kecamatan **{lokasi_filter}** tidak tersedia dalam database.")
     else:
-        df_filtered = df_rumah[
-            (df_rumah["Kecamatan"] == lokasi_filter) & (df_rumah["Range Harga"] == harga_filter)
-        ]
+        df_filtered = df_rumah[(df_rumah["Kecamatan"] == lokasi_filter) & (df_rumah["Range Harga"] == harga_filter)]
 
         if not df_filtered.empty:
             st.subheader("📌 Ringkasan Spesifikasi Rumah:")
